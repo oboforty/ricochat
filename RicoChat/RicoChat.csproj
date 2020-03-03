@@ -7,12 +7,25 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="img\admin.png" />
+    <None Remove="img\offline.png" />
+    <None Remove="img\online.png" />
+    <None Remove="img\talking.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="NAudio" Version="1.10.0" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Properties\" />
-    <Folder Include="Resources\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\admin.png" />
+    <Resource Include="Resources\offline.png" />
+    <Resource Include="Resources\online.png" />
+    <Resource Include="Resources\talking.png" />
   </ItemGroup>
 
 </Project>

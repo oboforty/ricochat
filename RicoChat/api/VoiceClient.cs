@@ -1,5 +1,6 @@
 ﻿using RicoChat.test;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -33,6 +34,7 @@ namespace RicoChat.api
         private bool udpConnectionActive;
 
         public string ClientAddress { get; set; }
+
         public string ServerAddress { get; set; }
         public string ServerName { get; set; }
 
@@ -40,14 +42,8 @@ namespace RicoChat.api
 
         private bool _AllowUdpThread = true;
 
-        public VoiceClient(string address, IVoiceHandler c0)
+        public VoiceClient(string ip, int port)
         {
-            var splittedAddress = address.Split(':');
-            var ip = splittedAddress[0];
-            var port = splittedAddress[1];
-
-            playback = c0;
-
             clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             //clientSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
 
@@ -62,20 +58,23 @@ namespace RicoChat.api
             //    //localEndPoint = endPoint;
             //}
 
-            remoteEndPoint = new IPEndPoint(IPAddress.Parse(ip), Int32.Parse(port));
+            remoteEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
 
+        }
+
+        public bool UdpAuthenticate(string username)
+        {
             // authenticate
             try
             {
                 var ep = remoteEndPoint as EndPoint;
-                byte[] bytes = Encoding.ASCII.GetBytes("vcon oboforty");
+                byte[] bytes = Encoding.ASCII.GetBytes("vcon " + username);
                 clientSocket.SendTo(bytes, 0, bytes.Length, SocketFlags.None, ep);
 
                 // validate authentication
                 byte[] recbytes = new byte[64];
                 clientSocket.ReceiveTimeout = 5000;
                 var bytesRead = clientSocket.ReceiveFrom(recbytes, ref ep);
-
 
                 // parse header bytes:
                 byte[] client_bytes = new byte[8];
@@ -93,19 +92,68 @@ namespace RicoChat.api
                 else
                 {
                     throw new Exception("Authentication error");
+                    return false;
                 }
             }
             catch (SocketException e)
             {
                 ErrorLog.Write("AUTHENTICATE", e);
-                return;
+                return false;
             }
             catch (Exception e)
             {
                 ErrorLog.Write("AUTHENTICATE", e);
-                return;
+                return false;
             }
 
+            return true;
+        }
+
+        public Dictionary<int, string> Join(string chname)
+        {
+            Dictionary<int, string> users = new Dictionary<int, string>();
+
+            try
+            {
+                var ep = remoteEndPoint as EndPoint;
+                byte[] bytes = Encoding.ASCII.GetBytes("join " + chname);
+                clientSocket.SendTo(bytes, 0, bytes.Length, SocketFlags.None, ep);
+
+                // get userlist
+                byte[] recbytes = new byte[4096];
+                clientSocket.ReceiveTimeout = 5000;
+
+                // headers + client_id
+                int bytesRead = clientSocket.ReceiveFrom(recbytes, ref ep);
+                string users_string = Encoding.ASCII.GetString(recbytes, 8, bytesRead-8);
+
+                foreach (string usr in users_string.Split("|"))
+                {
+                    var u = usr.Split(":");
+                    int client_id2 = Int32.Parse(u[0]);
+                    string username2 = u[1];
+
+                    users.Add(client_id2, username2);
+                }
+            }
+            catch (SocketException e)
+            {
+                ErrorLog.Write("AUTHENTICATE", e);
+                return null;
+            }
+            catch (Exception e)
+            {
+                ErrorLog.Write("AUTHENTICATE", e);
+                return null;
+            }
+
+            return users;
+        }
+
+
+        public void StartReceiving(IVoiceHandler v0)
+        {
+            playback = v0;
 
             // Start voice connection
             // todo: binding causes error: The requested address is not valid in its context
@@ -126,17 +174,6 @@ namespace RicoChat.api
                     return false;
                 }
                 var ep = remoteEndPoint as EndPoint;
-
-                //byte[] bytes = Encoding.ASCII.GetBytes("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");
-                //clientSocket.SendTo(bytes, 0, bytes.Length, SocketFlags.None, ep);
-
-                //// temporal: random bytes
-                //Byte[] b = new Byte[32];
-                //rnd.NextBytes(b);
-                //clientSocket.SendTo(b, 0, 1600, SocketFlags.None, ep);
-                //Random rnd = new Random();
-
-                //if (rnd.NextDouble() > 0.75)
                 clientSocket.SendTo(buffer, 0, bytesRecorded, SocketFlags.None, ep);
             }
             catch (Exception e)
@@ -147,7 +184,6 @@ namespace RicoChat.api
 
             return true;
         }
-
 
         private void ReceiveThread()
         {

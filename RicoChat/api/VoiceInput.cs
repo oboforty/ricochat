@@ -3,7 +3,7 @@ using System;
 
 namespace RicoChat.api
 {
-    class VoiceIO
+    class VoiceInput
     {
         private WaveInEvent sourceStream;
 
@@ -11,15 +11,10 @@ namespace RicoChat.api
 
         private IVoiceHandler micHandler;
 
-        public VoiceIO(IVoiceHandler c0, int devin)
+        public VoiceInput(IVoiceHandler c0, int devin)
         {
             micHandler = c0;
             InputAudioDevice = devin;
-
-            //waveProvider = new BufferedWaveProvider(new WaveFormat(8000, 16, WaveIn.GetCapabilities(OutputAudioDevice).Channels));
-            //recievedStream = new WaveOut();
-            //recievedStream.Init(waveProvider);
-
 
             sourceStream = new WaveInEvent
             {

@@ -24,9 +24,12 @@ namespace RicoChat
     /// </summary>
     public partial class MainWindow : Window
     {
-        private VoiceIO app;
-        private IVoiceHandler hand_out;
-        private IVoiceHandler hand_udp;
+        RicoChatClient client;
+
+        public BitmapImage im_online = new BitmapImage(new Uri(@"pack://application:,,,/Resources/online.png"));
+        public BitmapImage im_offline = new BitmapImage(new Uri(@"pack://application:,,,/Resources/offline.png"));
+        public BitmapImage im_talking = new BitmapImage(new Uri(@"pack://application:,,,/Resources/talking.png"));
+        public BitmapImage im_admin = new BitmapImage(new Uri(@"pack://application:,,,/Resources/admin.png"));
 
         public MainWindow()
         {
@@ -48,27 +51,38 @@ namespace RicoChat
                 OutputComboBox.SelectedIndex = 0;
 
 
-            // Init Voice IO + Connections
-            int InputAudioDevice = InputComboBox.SelectedIndex;
-            int OutputAudioDevice = OutputComboBox.SelectedIndex;
 
-            //string host = "127.0.0.1:9001";
-            string host = "80.217.114.215:9001";
+            client = new RicoChatClient();
+            //client.SetDevices(InputComboBox.SelectedIndex, OutputComboBox.SelectedIndex);
 
-            //var hand_save = new TestSoundSave();
-            //var pp = new TestSoundIO(hand_udp);
+            //string addr = "80.217.114.215";
+            string addr = "127.0.0.1";
+            var _users = client.ConnectToServer("oboforty", addr, 9001);
 
-            // Right now the chat plays back what you say
-            hand_out = new VoicePlayback(OutputAudioDevice);
-            hand_udp = new VoiceClient(host, hand_out);
-            app = new VoiceIO(hand_udp, InputAudioDevice);
+            foreach (KeyValuePair<int, string> user in _users)
+            {
+                Label label = new Label();
+                label.Content = user.Value;
+                label.Name = "Username_" + user.Key;
+                label.Height = 35;
+                Usernames.Children.Add(label);
+
+
+                Image img = new Image();
+                img.Source = im_offline;
+                img.Width = 35;
+                img.Height = 35;
+                img.Name = "Profile_" + user.Key;
+                Images.Children.Add(img);
+            }
+
+
+            client.StartVoiceIO(InputComboBox.SelectedIndex, OutputComboBox.SelectedIndex);
         }
 
         public void Window_Closing(object sender, CancelEventArgs e)
         {
-            hand_udp.Dispose();
-            hand_out.Dispose();
-            app.Dispose();
+            client.Dispose();
         }
 
     }

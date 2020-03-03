@@ -5,10 +5,33 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RicoChat"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="300"
+        Title="MainWindow" Height="450" Width="200"
         Closing="Window_Closing">
+
     <Grid Background="Black">
-        <ComboBox Name="InputComboBox" HorizontalAlignment="Left" Margin="170,370,0,0" VerticalAlignment="Top" Width="120"/>
-        <ComboBox Name="OutputComboBox" HorizontalAlignment="Left" Margin="170,402,0,0" VerticalAlignment="Top" Width="120"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="40" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40px" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="25px" />
+            <RowDefinition Height="25px" />
+        </Grid.RowDefinitions>
+
+
+        <Label Grid.Row="0" Grid.Column="1" Content="RicoChat" Foreground="#FFACFF03" FontWeight="Normal" FontSize="24"/>
+
+        <StackPanel Name="Images" Grid.Row="1" Grid.Column="0" Orientation="Vertical"/>
+        <StackPanel Name="Usernames" Grid.Row="1" Grid.Column="1" Orientation="Vertical">
+
+            <Image Source="" />
+
+        </StackPanel>
+
+        <ComboBox Grid.Row="2" Grid.Column="0" Name="InputComboBox" Margin="4,0,4,4"/>
+        <ComboBox Grid.Row="3" Grid.Column="0" Name="OutputComboBox" Margin="4,0,4,4"/>
+
     </Grid>
 </Window>

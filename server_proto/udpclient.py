@@ -1,20 +1,16 @@
 import socket
 import threading
-
-#UDP_IP = "127.0.0.1"
 import time
 
-UDP_IP = "80.217.114.215"
+
+#UDP_IP = "80.217.114.215"
+UDP_IP = "127.0.0.1"
 UDP_PORT = 9001
 
 
-
-
 sock = socket.socket(socket.AF_INET,  socket.SOCK_DGRAM)
-
 #sock.connect((UDP_IP, UDP_PORT))
 sock.sendto(b'vcon oboforty', (UDP_IP, UDP_PORT))
-
 resp = sock.recv(1024)
 print(resp)
 

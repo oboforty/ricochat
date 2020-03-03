@@ -17,12 +17,12 @@ namespace RicoChat.api
 
         private Thread tcpRecieveThread;
 
-        public DataClient()
+        public DataClient(string username, string serverAddress, int port)
         {
-            //server = new TcpClient(serverAddress, port);
+            server = new TcpClient(serverAddress, port);
 
+            var bytes = Encoding.Unicode.GetBytes("connect||" + username);
+            server.Client.Send(bytes);
         }
-
-
     }
 }

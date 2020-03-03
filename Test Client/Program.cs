@@ -3,12 +3,17 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Net;
+using System.Net.Sockets;
+
 
 namespace Test_Client
 {
     class Program
     {
-        static void Main(string[] args)
+
+
+        static void OlD_Main(string[] args)
         {
             Socket clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 

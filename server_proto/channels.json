@@ -1,0 +1,10 @@
+{
+  "default": {
+    "name": "Sakira Fan Club",
+    "max_users": 99,
+    "vc": {
+      "protocol": "rc_udp", "version": 0.1,
+      "ww": 8000, "bitrate": 16, "channels": 2,
+      "codec": "PCM"
+    }}
+}
