@@ -15,7 +15,7 @@ if __name__ == "__main__":
 
     def thread_tcp():
         _port = PORT + 1
-        print("RicoChat Signaling server: listening on {}:{}".format(ADDR, _port))
+        print("RicoChat Signal server: listening on {}:{}".format(ADDR, _port))
         serverTCP = SignalingServer(bundle, (ADDR, _port))
         serverTCP.serve_forever()
 
@@ -25,8 +25,8 @@ if __name__ == "__main__":
         serverUDP = VoiceServer(bundle, (ADDR, _port))
         serverUDP.serve_forever()
 
-    # t1 = threading.Thread(target=thread_tcp)
-    # t1.start()
+    t1 = threading.Thread(target=thread_tcp)
+    t1.start()
 
     t2 = threading.Thread(target=thread_udp)
     t2.start()

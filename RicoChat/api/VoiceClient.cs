@@ -1,12 +1,10 @@
 ﻿using RicoChat.test;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using System.Windows;
 
 
 namespace RicoChat.api
@@ -62,13 +60,13 @@ namespace RicoChat.api
 
         }
 
-        public bool UdpAuthenticate(string username)
+        public bool UdpAuthenticate(int vcid, string uid)
         {
             // authenticate
             try
             {
                 var ep = remoteEndPoint as EndPoint;
-                byte[] bytes = Encoding.ASCII.GetBytes("vcon " + username);
+                byte[] bytes = Encoding.ASCII.GetBytes($"vcon {vcid} {uid}");
                 clientSocket.SendTo(bytes, 0, bytes.Length, SocketFlags.None, ep);
 
                 // validate authentication
@@ -76,78 +74,31 @@ namespace RicoChat.api
                 clientSocket.ReceiveTimeout = 5000;
                 var bytesRead = clientSocket.ReceiveFrom(recbytes, ref ep);
 
-                // parse header bytes:
-                byte[] client_bytes = new byte[8];
-                Buffer.BlockCopy(recbytes, 0, client_bytes, 0, 8);
-                int client_id = BitConverter.ToInt32(client_bytes, 0);
-
                 // parse rest of message:
-                string authResp = Encoding.ASCII.GetString(recbytes, 8, bytesRead - 8);
+                string authResp = Encoding.ASCII.GetString(recbytes, 0, bytesRead);
                 if (authResp == "voke")
                 {
                     udpConnectionActive = true;
 
                     clientSocket.ReceiveTimeout = 0;
+
+                    return true;
                 }
                 else
                 {
                     throw new Exception("Authentication error");
-                    return false;
                 }
             }
             catch (SocketException e)
             {
                 ErrorLog.Write("AUTHENTICATE", e);
-                return false;
             }
             catch (Exception e)
             {
                 ErrorLog.Write("AUTHENTICATE", e);
-                return false;
             }
 
-            return true;
-        }
-
-        public Dictionary<int, string> Join(string chname)
-        {
-            Dictionary<int, string> users = new Dictionary<int, string>();
-
-            try
-            {
-                var ep = remoteEndPoint as EndPoint;
-                byte[] bytes = Encoding.ASCII.GetBytes("join " + chname);
-                clientSocket.SendTo(bytes, 0, bytes.Length, SocketFlags.None, ep);
-
-                // get userlist
-                byte[] recbytes = new byte[4096];
-                clientSocket.ReceiveTimeout = 5000;
-
-                // headers + client_id
-                int bytesRead = clientSocket.ReceiveFrom(recbytes, ref ep);
-                string users_string = Encoding.ASCII.GetString(recbytes, 8, bytesRead-8);
-
-                foreach (string usr in users_string.Split("|"))
-                {
-                    var u = usr.Split(":");
-                    int client_id2 = Int32.Parse(u[0]);
-                    string username2 = u[1];
-
-                    users.Add(client_id2, username2);
-                }
-            }
-            catch (SocketException e)
-            {
-                ErrorLog.Write("AUTHENTICATE", e);
-                return null;
-            }
-            catch (Exception e)
-            {
-                ErrorLog.Write("AUTHENTICATE", e);
-                return null;
-            }
-
-            return users;
+            return false;
         }
 
 
@@ -197,7 +148,7 @@ namespace RicoChat.api
                 {
                     var bytesRead = clientSocket.ReceiveFrom(state.Buffer, 0, StateObject.BUFFER_SIZE, SocketFlags.None, ref ep);
 
-                    // trim off first 8 bytes
+                    // trim off first 8 bytes (7 vcid & 1 qos)
                     int L = bytesRead - 8;
                     byte[] audio_data = new byte[L];
                     Buffer.BlockCopy(state.Buffer, 8, audio_data, 0, L);

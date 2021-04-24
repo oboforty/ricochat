@@ -10,22 +10,23 @@
         "projectUniqueName": "D:\\dev\\RicoChat\\RicoChat\\RicoChat.csproj",
         "projectName": "RicoChat",
         "projectPath": "D:\\dev\\RicoChat\\RicoChat\\RicoChat.csproj",
-        "packagesPath": "C:\\Users\\oboforty\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\rajmu\\.nuget\\packages\\",
         "outputPath": "D:\\dev\\RicoChat\\RicoChat\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\oboforty\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\rajmu\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
-          "netcoreapp3.1"
+          "net48"
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "netcoreapp3.1": {
+          "net48": {
+            "targetAlias": "net48",
             "projectReferences": {}
           }
         },
@@ -36,32 +37,20 @@
         }
       },
       "frameworks": {
-        "netcoreapp3.1": {
+        "net48": {
+          "targetAlias": "net48",
           "dependencies": {
             "NAudio": {
               "target": "Package",
               "version": "[1.10.0, )"
             }
           },
-          "imports": [
-            "net461",
-            "net462",
-            "net47",
-            "net471",
-            "net472",
-            "net48"
-          ],
-          "assetTargetFallback": true,
-          "warn": true,
-          "frameworkReferences": {
-            "Microsoft.NETCore.App": {
-              "privateAssets": "all"
-            },
-            "Microsoft.WindowsDesktop.App.WPF": {
-              "privateAssets": "none"
-            }
-          },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.101\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.200\\RuntimeIdentifierGraph.json"
+        }
+      },
+      "runtimes": {
+        "win7-x86": {
+          "#import": []
         }
       }
     }

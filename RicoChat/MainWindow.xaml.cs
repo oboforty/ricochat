@@ -4,6 +4,7 @@ using RicoChat.test;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -56,28 +57,42 @@ namespace RicoChat
             //client.SetDevices(InputComboBox.SelectedIndex, OutputComboBox.SelectedIndex);
 
             //string addr = "80.217.114.215";
-            string addr = "127.0.0.1";
-            var _users = client.ConnectToServer("oboforty", addr, 9001);
+            string[] lines = File.ReadAllText("connection.txt").Split('\n');
 
-            foreach (KeyValuePair<int, string> user in _users)
+            string addr = lines[0].Split(':')[0];
+            int port = 9001;
+
+            string username = lines[1];
+            string uid = lines[1];
+
+            if (lines.Length >= 3 && !string.IsNullOrWhiteSpace(lines[2]))
+                // client-provided uuid (otherwise it's username)
+                uid = lines[2];
+
+            var _users = client.ConnectToServer(uid, username, addr, port);
+
+            if (_users != null)
             {
-                Label label = new Label();
-                label.Content = user.Value;
-                label.Name = "Username_" + user.Key;
-                label.Height = 35;
-                Usernames.Children.Add(label);
 
+                foreach (KeyValuePair<string, string> user in _users)
+                {
+                    Label label = new Label();
+                    label.Content = user.Value;
+                    label.Name = "Username_" + user.Key;
+                    label.Height = 35;
+                    label.Foreground = new SolidColorBrush(Colors.White);
+                    Usernames.Children.Add(label);
 
-                Image img = new Image();
-                img.Source = im_offline;
-                img.Width = 35;
-                img.Height = 35;
-                img.Name = "Profile_" + user.Key;
-                Images.Children.Add(img);
+                    Image img = new Image();
+                    img.Source = im_offline;
+                    img.Width = 35;
+                    img.Height = 35;
+                    img.Name = "Profile_" + user.Key;
+                    Images.Children.Add(img);
+                }
+
+                client.StartVoiceIO(InputComboBox.SelectedIndex, OutputComboBox.SelectedIndex);
             }
-
-
-            client.StartVoiceIO(InputComboBox.SelectedIndex, OutputComboBox.SelectedIndex);
         }
 
         public void Window_Closing(object sender, CancelEventArgs e)

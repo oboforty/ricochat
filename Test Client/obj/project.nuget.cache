@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "AQvNl/Y90fz49zuMcedEV2h3n58WNfftZuShqop/efS7PJAZ0zNSMw/J6R99gXpp11thi0bUY0znAsOhIlgVUA==",
+  "success": true,
+  "projectFilePath": "D:\\dev\\RicoChat\\Test Client\\unins000.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\rajmu\\.nuget\\packages\\newtonsoft.json\\12.0.3\\newtonsoft.json.12.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}

@@ -3,108 +3,73 @@ import socketserver
 
 ENCODING = 'ascii'
 
-class MyUDPHandler:
-
-    def __init__(self, request, client_address, server):
-        packet, socket = request
-
-        # todo: temporal signaling here
-        if packet.startswith(b'vcon'):
-            username = packet.split(b' ')[1].decode(ENCODING)
-            server.create_client(username, socket, client_address)
-        elif packet.startswith(b'join'):
-            chname = packet.split(b' ')[1].decode(ENCODING)
-            server.switch_channel(chname, client_address)
-        else:
-            # voice data - echo
-            client_id = server.clients[client_address]
-            server.send(packet, client_id)
-
-            # spread voice data
-            #server.send_channel(client_address, packet)
-
 
 class VoiceServer(socketserver.UDPServer):
     allow_reuse_address = True
     max_packet_size = 8192
 
     def __init__(self, bundle, server_address):
-        # channel -> client_id
         self.bundle = bundle
-        # client_id -> addr, socket
+        self.echo_server = False
+        self.qos = False
+
         self.connections = {}
-        # addr -> client_id
-        self.clients = {}
+        self.uid2addr = {}
 
-        super().__init__(server_address, MyUDPHandler)
+        super().__init__(server_address, self.onreceive)
 
-    def create_client(self, username, socket, addr):
-        if addr in self.clients:
-            client_id = self.clients[addr]
+    def onreceive(self, request, client_address, server):
+        packet, socket = request
 
-            # reset username
-            self.bundle.set_username(client_id, username)
-            client = self.bundle.clients[client_id]
+        # todo: temporal signaling here
+        if packet.startswith(b'vcon'):
+            parts = packet.split(b' ')
 
-            # set relations
-            self.connections[client_id] = (addr, socket)
+            vcid = parts[1].decode(ENCODING)
+            uid = parts[2].decode(ENCODING)
+            client = self.bundle.clients[uid]
+
+            self.connections[client_address] = (socket, client)
+            self.uid2addr[uid] = client_address
+
+            print("VCON:", vcid, client['username'], uid)
+            socket.sendto(b"voke", client_address)
         else:
-            client_id, client = self.bundle.create_client(username)
+            # voice data - echo
+            socket, client = self.connections[client_address]
 
-            # set relations
-            self.clients[addr] = client_id
-            self.connections[client_id] = (addr, socket)
+            if self.echo_server:
+                msg = self.wrap_msg(packet, client['vcid'])
+                socket.sendto(msg, client_address)
+            else:
+                # spread voice data
+                self.send_channel(client['channel'], client['vcid'], packet)
 
-        print("New client: {}".format(username))
-        self.send(b'voke', client_id, qos=True)
-
-        return client
-
-    def switch_channel(self, chname, addr):
-        client_id = self.clients[addr]
-        client = self.bundle.clients[client_id]
-        ex_channel = client['channel']
-
-        # join new one
-        if self.bundle.set_channel(client_id, chname):
-            if ex_channel:
-                # leave current channel
-                self.bundle.leave_channel(client_id)
-                self.send_channel(ex_channel, b'leav', qos=True)
-
-            # make a string of all users
-            str0 = []
-            for client_id2 in self.bundle.channels[chname]:
-                username = self.bundle.clients[client_id2]['username']
-                str0.append(str(client_id2) + ':' + username)
-
-            self.send(('|'.join(str0)).encode(ENCODING), client_id)
-
-            username = client['username']
-            print("switched channel", chname, username, client_id, str0)
-            #self.send_channel(b'join '+username,chname, qos=True)
-
-    def send(self, msg, client_id, qos=False):
-        addr, socket = self.connections[client_id]
-
+    def wrap_msg(self, msg, vcid):
         # mask: |-|-|-|-|-|-|-|Q|
         masks = 0
-        if qos: masks |= 1 # Q - qos
+        if self.qos:
+            masks |= 1 # Q - qos
 
-        header = client_id.to_bytes(7, byteorder="little")
+        header = vcid.to_bytes(7, byteorder="little")
         header += bytes([masks])
-        socket.sendto(header+msg, addr)
 
-        if qos:
-            # todo: later check if ACKresponse have been given
-            pass
+        return header+msg
 
-    def send_channel(self, msg, chname, qos=False, exception=None):
-        clients = self.bundle.channels[chname].copy()
+    # def send(self, msg, addr, qos=False):
+    #     socket = self.connections[addr]
+    #     socket.sendto(header+msg, addr)
 
-        # multicast to everyone except sending user
-        if exception is not None:
-            clients.remove(exception)
+    def send_channel(self, chname, vcid, msg):
+        clients = self.bundle.channels[chname]
+        msg = self.wrap_msg(msg, vcid)
 
-        for client_id in clients:
-            self.send(msg, client_id, qos=qos)
+        for uid in clients:
+            addr = self.uid2addr[uid]
+            socket, client = self.connections[addr]
+
+            if client['vcid'] == vcid:
+               # skip sending user's vc
+               continue
+
+            socket.sendto(msg, addr)

@@ -1,84 +1,113 @@
-import socket
-import selectors
-import types
+import secrets
+import socketserver
+import threading
+
+ENCODING = 'ascii'
 
 
-class SignalingServer:
-    def __init__(self, bundle, addr):
+class SignalingServer(socketserver.ThreadingTCPServer):
+    allow_reuse_address = True
+    max_packet_size = 2048
+
+    def __init__(self, bundle, server_address):
         self.bundle = bundle
-        self.sel = selectors.DefaultSelector()
+        # uid -> addr, socket
+        self.connections = {}
+        # uid -> client descriptor
+        self.addr2uid = {}
 
-        self.clients = {}
+        super().__init__(server_address, self.onconnect)
 
-        lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        lsock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
-        lsock.bind(addr)
-        lsock.listen()
+    def create_client(self, uid, username, socket, addr):
+        client = self.bundle.create_client(uid, username)
 
-        lsock.setblocking(False)
-        self.sel.register(lsock, selectors.EVENT_READ, data=None)
+        # set relations
+        self.addr2uid[addr] = uid
+        self.connections[uid] = (addr, socket)
 
-        events = selectors.EVENT_READ | selectors.EVENT_WRITE
+        self.send_to(uid, b'soke '+str(client['vcid']).encode(ENCODING))
+        return client
 
-    def accept_wrapper(self, sock):
-        conn, addr = sock.accept()  # Should be ready to read
-        conn.setblocking(False)
+    def switch_channel(self, chname, addr):
+        uid = self.addr2uid[addr]
+        client = self.bundle.clients[uid]
+        ex_channel = client['channel']
 
-        # register connection
-        data = types.SimpleNamespace(addr=addr, inb=b'', outb=b'')
-        events = selectors.EVENT_READ | selectors.EVENT_WRITE
-        self.sel.register(conn, events, data=data)
+        # join new one
+        if self.bundle.set_channel(uid, chname):
+            if ex_channel:
+                # leave current channel
+                self.bundle.leave_channel(uid)
+                self.send_channel(ex_channel, b'leav', qos=True)
 
-    def service_connection(self, key, mask):
-        sock = key.fileobj
-        addr = key.data.addr
+            # make a string of all users
+            str0 = []
+            for uid2 in self.bundle.channels[chname]:
+                client2 = self.bundle.clients[uid2]
+                str0.append(str(client2['vcid']) + ':' + client2['username'])
 
-        if mask & selectors.EVENT_READ:
-            data = sock.recv(1024)
+            self.send_to(uid, '|'.join(str0))
 
-            if data:
-                if data.startswith(b'connect'):
-                    # authenticate
-                    username = data.split(b'||')[1]
-                    client_id = self.add_client(addr, username)
-                    print('new connection:', client_id, username, addr)
+            username = client['username']
+            vcid = client['vcid']
+            print("JOIN:", chname, username, uid)
+            self.send_channel(chname, f'join {vcid} {username}'.encode(ENCODING), qos=True)
 
-                    header = b"ok||" + client_id.to_bytes(8, byteorder="little")
-                    key.data.outb += header
-                else:
-                    # echo server
-                    key.data.outb += data
+    def onconnect(self, socket, client_address, server):
+        BUFFER = 2048
+
+        while 1:
+            # get input with wait if no data
+            data = socket.recv(BUFFER)
+
+            # suspect many more data (try to get all - without stop if no data)
+            if len(data) == BUFFER:
+                while 1:
+                    try:  # error means no more data
+                        data += socket.recv(BUFFER, socket.MSG_DONTWAIT)
+                    except:
+                        break
+
+            # no data found exit loop (posible closed socket)
+            if data == "":
+                break
+
+            # processing input
+            data = data.strip()
+
+            if data.startswith(b'scon'):
+                parts = data.split(b' ')
+                uid = parts[1].decode(ENCODING)
+                username = parts[2].decode(ENCODING)
+
+                print(f"SCON: {client_address[0]} {username} {uid} ({threading.currentThread().getName()})")
+                self.create_client(uid, username, socket, client_address)
+            elif data.startswith(b'join'):
+                chname = data.split(b' ')[1].decode(ENCODING)
+
+                self.switch_channel(chname, client_address)
             else:
-                # todo: later close connection after a bit of unconnectivity
-                print('closing connection to', addr)
-                self.sel.unregister(sock)
-                #sock.close()
-                pass
+                # todo: ?idk
+                print("Unknown packet: " + data)
 
-        if mask & selectors.EVENT_WRITE:
-            outb = key.data.outb
-            if outb:
-                # forwarding repr(data.outb) to data.addr
-                sent = sock.send(outb)
-                key.data.outb = outb[sent:]
+    def send_channel(self, chname, msg, qos=False, exception=None):
+        addr2uid = self.bundle.channels[chname].copy()
 
-    def serve_forever(self):
-        while True:
-            events = self.sel.select(timeout=None)
-            for key, mask in events:
-                if key.data is None:
-                    self.accept_wrapper(key.fileobj)
-                else:
-                    self.service_connection(key, mask)
+        # multicast to everyone except sending user
+        if exception is not None:
+            addr2uid.remove(exception)
 
-    def add_client(self, addr, username):
-        if addr in self.clients:
-            # reset username
-            client_id = self.clients[addr]
-            self.bundle.set_username(client_id, username)
-        else:
-            # new connection
-            client_id, client = self.bundle.create_client(username)
-            self.clients[addr] = client_id
+        if isinstance(msg, str):
+            msg = msg.encode(ENCODING)
 
-        return client_id
+        for uid in addr2uid:
+            self.send_to(uid, msg)
+
+    def send_to(self, uid, msg):
+        addr, socket = self.connections.get(uid, (None, None))
+
+        if isinstance(msg, str):
+            msg = msg.encode(ENCODING)
+
+        if addr is not None:
+            socket.sendto(msg, addr)

@@ -1,0 +1,15 @@
+D:\dev\RicoChat\Test Client\bin\Release\netcoreapp3.1\unins000.exe
+D:\dev\RicoChat\Test Client\bin\Release\netcoreapp3.1\unins000.deps.json
+D:\dev\RicoChat\Test Client\bin\Release\netcoreapp3.1\unins000.runtimeconfig.json
+D:\dev\RicoChat\Test Client\bin\Release\netcoreapp3.1\unins000.runtimeconfig.dev.json
+D:\dev\RicoChat\Test Client\bin\Release\netcoreapp3.1\unins000.dll
+D:\dev\RicoChat\Test Client\bin\Release\netcoreapp3.1\unins000.pdb
+D:\dev\RicoChat\Test Client\bin\Release\netcoreapp3.1\Newtonsoft.Json.dll
+D:\dev\RicoChat\Test Client\obj\Release\netcoreapp3.1\unins000.csprojAssemblyReference.cache
+D:\dev\RicoChat\Test Client\obj\Release\netcoreapp3.1\unins000.AssemblyInfoInputs.cache
+D:\dev\RicoChat\Test Client\obj\Release\netcoreapp3.1\unins000.AssemblyInfo.cs
+D:\dev\RicoChat\Test Client\obj\Release\netcoreapp3.1\unins000.csproj.CoreCompileInputs.cache
+D:\dev\RicoChat\Test Client\obj\Release\netcoreapp3.1\unins000.csproj.CopyComplete
+D:\dev\RicoChat\Test Client\obj\Release\netcoreapp3.1\unins000.dll
+D:\dev\RicoChat\Test Client\obj\Release\netcoreapp3.1\unins000.pdb
+D:\dev\RicoChat\Test Client\obj\Release\netcoreapp3.1\unins000.genruntimeconfig.cache

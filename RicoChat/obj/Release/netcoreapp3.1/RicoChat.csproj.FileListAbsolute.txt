@@ -17,3 +17,6 @@ D:\dev\RicoChat\RicoChat\obj\Release\netcoreapp3.1\RicoChat.AssemblyInfo.cs
 D:\dev\RicoChat\RicoChat\obj\Release\netcoreapp3.1\RicoChat.csproj.CopyComplete
 D:\dev\RicoChat\RicoChat\obj\Release\netcoreapp3.1\RicoChat.dll
 D:\dev\RicoChat\RicoChat\obj\Release\netcoreapp3.1\RicoChat.pdb
+D:\dev\RicoChat\RicoChat\obj\Release\netcoreapp3.1\RicoChat.csproj.CoreCompileInputs.cache
+D:\dev\RicoChat\RicoChat\obj\Release\netcoreapp3.1\RicoChat.genruntimeconfig.cache
+D:\dev\RicoChat\RicoChat\bin\Release\netcoreapp3.1\connection.txt

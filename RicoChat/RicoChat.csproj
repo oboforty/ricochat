@@ -2,16 +2,10 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
+    <!--netcoreapp3.1-->
     <UseWPF>true</UseWPF>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="img\admin.png" />
-    <None Remove="img\offline.png" />
-    <None Remove="img\online.png" />
-    <None Remove="img\talking.png" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="NAudio" Version="1.10.0" />
@@ -26,6 +20,14 @@
     <Resource Include="Resources\offline.png" />
     <Resource Include="Resources\online.png" />
     <Resource Include="Resources\talking.png" />
+    <Resource Include="Resources\blue.png" />
+    <Resource Include="Resources\red.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="connection.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

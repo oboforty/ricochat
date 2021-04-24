@@ -30,8 +30,8 @@
 
         </StackPanel>
 
-        <ComboBox Grid.Row="2" Grid.Column="0" Name="InputComboBox" Margin="4,0,4,4"/>
-        <ComboBox Grid.Row="3" Grid.Column="0" Name="OutputComboBox" Margin="4,0,4,4"/>
+        <ComboBox Grid.Row="2" Grid.Column="1" Name="InputComboBox" Margin="4,0,4,4"/>
+        <ComboBox Grid.Row="3" Grid.Column="1" Name="OutputComboBox" Margin="4,0,4,4"/>
 
     </Grid>
 </Window>

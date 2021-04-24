@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
+
 
 namespace RicoChat.api
 {
@@ -10,29 +9,30 @@ namespace RicoChat.api
         VoiceInput m_HandIn;
 
         VoiceClient m_VoiceClient;
-        DataClient m_DataClient;
+        SignalClient m_DataClient;
 
         public RicoChatClient()
         {
 
         }
 
-        public Dictionary<int, string> ConnectToServer(string username, string address, int port = 9000)
+        public Dictionary<string, string> ConnectToServer(string uid, string username, string address, int port = 9000)
         {
             // connect to TCP
-            // m_DataClient = new DataClient(username, address, port+1);
+            m_DataClient = new SignalClient(address, port + 1);
+            if (m_DataClient.Authenticate(uid, username, out int vcid))
+            {
+                var resp = m_DataClient.Join("default");
+
+                m_VoiceClient = new VoiceClient(address, port);
+                if (m_VoiceClient.UdpAuthenticate(vcid, uid))
+                    return resp;
+            }
 
             //var hand_save = new TestSoundSave();
             //var pp = new TestSoundIO(voice_client);
 
-
-            // Right now the chat plays back what you say
-            m_VoiceClient = new VoiceClient(address, port);
-            if (m_VoiceClient.UdpAuthenticate(username))
-            {
-                return m_VoiceClient.Join("default");
-            }
-
+            // couldn't connect
             return null;
         }
 
@@ -55,8 +55,10 @@ namespace RicoChat.api
 
         }
 
-        internal void Dispose()
+        public void Dispose()
         {
+            
+            // @TODO: quit from VC & signal
             //m_DataClient.D
         }
     }

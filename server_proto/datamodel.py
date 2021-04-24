@@ -9,21 +9,22 @@ class Bundle:
             self.channel_info = json.load(fh)
 
         self.client_id = 0
-        self.client_info = {}
-        self.client_lock = threading.Lock()
+        self.clock = threading.Lock()
 
-        # client_id -> channel relation
+        # uid -> client descriptor relation
         self.clients = {}
-        # channel -> client_ids relation
+        # channel -> uids relation
         self.channels = defaultdict(set)
 
-    def create_client(self, username, chname=None):
-        self.client_lock.acquire()
+    def create_client(self, uid, username, chname=None):
+        self.clock.acquire()
         self.client_id += 1
-        client_id = self.client_id
-        self.client_lock.release()
+        vcid = self.client_id
+        self.clock.release()
 
         client = {
+            "uid": uid,
+            "vcid": vcid,
             "username": username,
             "channel": None,
             "about": "",
@@ -31,44 +32,44 @@ class Bundle:
             "speaking": False
         }
 
-        self.clients[client_id] = client
+        self.clients[uid] = client
 
         if chname:
-            self.set_channel(client_id, chname)
+            self.set_channel(uid, chname)
 
-        return client_id, client
+        return client
 
-    def set_username(self, client_id, username):
-        if client_id not in self.clients:
+    def set_username(self, uid, username):
+        if uid not in self.clients:
             return False
 
-        self.clients[client_id]['username'] = username
+        self.clients[uid]['username'] = username
 
-    def set_channel(self, client_id, chname):
+    def set_channel(self, uid, chname):
         if chname not in self.channel_info:
             return False
 
-        if client_id not in self.clients:
+        if uid not in self.clients:
             return False
 
-        if self.clients[client_id]['channel']:
+        if self.clients[uid]['channel']:
             # you have to request to leave channel first
             return False
 
-        self.clients[client_id]['channel'] = chname
-        self.channels[chname].add(client_id)
+        self.clients[uid]['channel'] = chname
+        self.channels[chname].add(uid)
 
         return True
 
-    def leave_channel(self, client_id):
-        if client_id not in self.clients:
+    def leave_channel(self, uid):
+        if uid not in self.clients:
             return False
 
-        exch = self.clients[client_id]['channel']
+        exch = self.clients[uid]['channel']
         if not exch:
             return False
 
-        self.channels[exch].remove(client_id)
-        self.clients[client_id]['channel'] = None
+        self.channels[exch].remove(uid)
+        self.clients[uid]['channel'] = None
 
         return exch

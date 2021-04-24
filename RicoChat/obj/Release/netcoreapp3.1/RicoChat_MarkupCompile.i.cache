@@ -1,5 +1,5 @@
 ﻿RicoChat
-
+1.0.0.0
 
 winexe
 C#
@@ -8,12 +8,12 @@ D:\dev\RicoChat\RicoChat\obj\Release\netcoreapp3.1\
 RicoChat
 none
 false
-TRACE;RELEASE;NETCOREAPP;NETCOREAPP3_1
+TRACE;RELEASE;NETCOREAPP;NETCOREAPP3_1;
 D:\dev\RicoChat\RicoChat\App.xaml
 11151548125
 
-12534627079
-193-928245553
+141382002726
+193991661041
 MainWindow.xaml;
 
 False
