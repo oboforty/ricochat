@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.29709.97
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RicoChat", "RicoChat\RicoChat.csproj", "{9CF1F6D5-D61C-4CB6-88C8-5F5DC04E43FE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "unins000", "Test Client\unins000.csproj", "{D1267DC8-3E21-40E4-9F02-21D702934292}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,10 +15,6 @@ Global
 		{9CF1F6D5-D61C-4CB6-88C8-5F5DC04E43FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9CF1F6D5-D61C-4CB6-88C8-5F5DC04E43FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9CF1F6D5-D61C-4CB6-88C8-5F5DC04E43FE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D1267DC8-3E21-40E4-9F02-21D702934292}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D1267DC8-3E21-40E4-9F02-21D702934292}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D1267DC8-3E21-40E4-9F02-21D702934292}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D1267DC8-3E21-40E4-9F02-21D702934292}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
